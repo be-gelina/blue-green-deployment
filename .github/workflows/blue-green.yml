@@ -82,7 +82,7 @@ jobs:
         # Проверяем и коммитим локальные изменения, если они есть
         if [ -n "$(git status --porcelain)" ]; then
           echo "Committing local changes before pulling..."
-          git add current_version
+          git add .  # Добавляем все изменения, включая untracked файлы
           git commit -m "Pre-pull commit for current_version"
         fi
 
@@ -90,7 +90,7 @@ jobs:
         git pull origin main --rebase
 
         # Добавляем изменения current_version
-        git add current_version
+        git add .
         git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
         git push origin main
 
