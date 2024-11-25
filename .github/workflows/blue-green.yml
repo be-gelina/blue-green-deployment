@@ -39,12 +39,13 @@ jobs:
       run: |
         CURRENT=$(cat current_version)
         if [ "$CURRENT" = "blue" ]; then
-          echo "NEW_VERSION=green" >> $GITHUB_ENV
+          NEW_VERSION="green"
         else
-          echo "NEW_VERSION=blue" >> $GITHUB_ENV
+          NEW_VERSION="blue"
         fi
         echo "Current version: $CURRENT"
-        echo "New version: ${{ env.NEW_VERSION }}"
+        echo "New version: $NEW_VERSION"
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
     - name: Deploy new version
       run: |
@@ -68,8 +69,10 @@ jobs:
         # Копируем index.html из новой версии в корень
         cp ${WORKSPACE}/${NEW_VERSION}/index.html ${WORKSPACE}/index.html
 
-        # Обновляем файл текущей версии
-        echo $NEW_VERSION > current_version
+        # Обновляем файл current_version
+        echo "Switching to $NEW_VERSION..."
+        echo $NEW_VERSION > ${WORKSPACE}/current_version
+        cat ${WORKSPACE}/current_version
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
