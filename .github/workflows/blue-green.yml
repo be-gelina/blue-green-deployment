@@ -53,6 +53,7 @@ jobs:
 
         cd ${WORKSPACE}
 
+        # Проверяем, что папка существует
         if [ -d "${NEW_VERSION}" ]; then
           echo "Directory ${NEW_VERSION} exists."
           ls -l ${NEW_VERSION}
@@ -61,13 +62,19 @@ jobs:
           exit 1
         fi
 
+        # Удаляем старые файлы из корня
         rm -rf ./*
-        cp -r ${WORKSPACE}/${NEW_VERSION}/* ${WORKSPACE}/
+
+        # Копируем содержимое новой версии
+        rsync -av ${WORKSPACE}/${NEW_VERSION}/ ${WORKSPACE}/ || cp -r ${WORKSPACE}/${NEW_VERSION}/* ${WORKSPACE}/
+
+        # Обновляем файл текущей версии
         echo $NEW_VERSION > current_version
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
         publish_dir: ./
 
