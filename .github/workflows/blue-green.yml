@@ -1,4 +1,4 @@
-name: Blue-Green Deployment
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -13,5 +13,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Print message
-      run: echo "Workflow is running! Ready to set up deployment."
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./ 
+
