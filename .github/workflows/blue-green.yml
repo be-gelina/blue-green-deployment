@@ -22,18 +22,6 @@ jobs:
           echo "blue" > current_version
         fi
 
-    - name: Debug file paths
-      run: |
-        ls -l
-        ls -l blue/
-        ls -l green/
-
-    - name: Debug green folder
-      run: |
-        WORKSPACE=${{ github.workspace }}
-        echo "Contents of green folder:"
-        ls -l ${WORKSPACE}/green || echo "Green folder is not accessible"
-
     - name: Set deployment target
       id: set-target
       run: |
@@ -90,31 +78,19 @@ jobs:
 
         # Обновляем файл current_version
         echo "Updating current_version to $NEW_VERSION..."
-        echo $NEW_VERSION | tee ${WORKSPACE}/current_version
+        echo $NEW_VERSION > ${WORKSPACE}/current_version
         cat ${WORKSPACE}/current_version
 
-    - name: Save current version
+    - name: Save and push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Проверяем и коммитим локальные изменения, если они есть
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "Committing local changes before pulling..."
-          git add .  # Добавляем все изменения, включая untracked файлы
-          git commit -m "Pre-pull commit for current_version"
-        fi
-
-        # Подтягиваем изменения из удалённой ветки
-        git pull origin main --rebase || exit 0  # Не завершаем ошибкой, если нет новых изменений
-
-        # Проверяем, нужно ли пушить изменения
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "Pushing changes to origin/main..."
-          git push origin main
-        else
-          echo "No changes to push. Exiting..."
-        fi
+        # Добавляем изменения и принудительно пушим
+        git add .
+        git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
+        git pull --rebase origin main || echo "Nothing to rebase"
+        git push origin main --force  # Принудительный пуш
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
