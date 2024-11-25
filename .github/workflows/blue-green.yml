@@ -17,14 +17,12 @@ jobs:
     - name: Set deployment target
       id: set-target
       run: |
-        # Определяем текущую версию (blue или green)
         if [ -f current_version ]; then
           CURRENT=$(cat current_version)
         else
           CURRENT="green"
         fi
 
-        # Переключаемся на другую версию
         if [ "$CURRENT" = "blue" ]; then
           echo "NEW_VERSION=green" >> $GITHUB_ENV
         else
@@ -38,15 +36,13 @@ jobs:
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
 
-        # Копируем новую версию в папку для публикации
-        cp -r $NEW_VERSION/* ./  # Копируем содержимое новой версии в корень
+        cp -r $NEW_VERSION/* ./
 
-        # Обновляем метку текущей версии
         echo $NEW_VERSION > current_version
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./  # Публикуем корневую папку
+        publish_dir: ./
 
