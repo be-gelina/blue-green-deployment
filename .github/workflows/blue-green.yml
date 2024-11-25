@@ -50,21 +50,26 @@ jobs:
         NEW_VERSION=${{ env.NEW_VERSION }}
         WORKSPACE=${{ github.workspace }}
 
+        # Переходим в рабочую директорию
+        cd ${WORKSPACE}
+
         # Удаляем старые файлы из корня
-        rm -rf ${WORKSPACE}/*
+        rm -rf ./*
 
         # Проверяем содержимое папки и копируем файлы
-        if [ -d "${WORKSPACE}/${NEW_VERSION}" ] && [ "$(ls -A ${WORKSPACE}/${NEW_VERSION})" ]; then
-          cp -r ${WORKSPACE}/${NEW_VERSION}/* ${WORKSPACE}/
-          echo $NEW_VERSION > ${WORKSPACE}/current_version
+        if [ -d "${NEW_VERSION}" ] && [ "$(ls -A ${NEW_VERSION})" ]; then
+          cp -r ${NEW_VERSION}/* ./
+          echo $NEW_VERSION > current_version
         else
           echo "Error: Directory ${NEW_VERSION} is empty or does not exist!" >&2
-          ls -l ${WORKSPACE}/${NEW_VERSION} || true
+          ls -l ${NEW_VERSION} || true
           exit 1
         fi
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./  # Публикуем содержимое корня
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./  # Публикуем содержимое корня
