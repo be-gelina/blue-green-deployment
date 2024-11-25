@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        clean: false  # Отключает очистку рабочей директории
+        clean: false
 
     - name: Initialize current version
       run: |
@@ -84,9 +84,13 @@ jobs:
         echo "Copying new index.html to root..."
         cp ${WORKSPACE}/${NEW_VERSION}/index.html ${WORKSPACE}/index.html
 
+        # Проверяем содержимое корня
+        echo "Contents of root after copying:"
+        ls -l ${WORKSPACE}/index.html
+
         # Обновляем файл current_version
         echo "Updating current_version to $NEW_VERSION..."
-        echo $NEW_VERSION > ${WORKSPACE}/current_version
+        echo $NEW_VERSION | tee ${WORKSPACE}/current_version
         cat ${WORKSPACE}/current_version
 
     - name: Save current version
