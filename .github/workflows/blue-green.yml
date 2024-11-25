@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        clean: false  # Отключает очистку рабочей директории
 
     - name: Initialize current version
       run: |
@@ -66,5 +68,7 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./
