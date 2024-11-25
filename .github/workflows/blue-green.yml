@@ -27,9 +27,6 @@ jobs:
         ls -l blue/  # Проверяем содержимое папки blue
         ls -l green/  # Проверяем содержимое папки green
 
-    - name: Debug green folder
-      run: ls -l green/  # Смотрим файлы в папке green
-
     - name: Set deployment target
       id: set-target
       run: |
@@ -46,17 +43,18 @@ jobs:
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
+        WORKSPACE=${{ github.workspace }}
 
         # Удаляем старые файлы из корня
-        rm -rf ./*
+        rm -rf ${WORKSPACE}/*
 
         # Проверяем содержимое папки и копируем файлы
-        if [ -d "$NEW_VERSION" ] && [ "$(ls -A $NEW_VERSION)" ]; then
-          cp -r $NEW_VERSION/* ./
-          echo $NEW_VERSION > current_version
+        if [ -d "${WORKSPACE}/${NEW_VERSION}" ] && [ "$(ls -A ${WORKSPACE}/${NEW_VERSION})" ]; then
+          cp -r ${WORKSPACE}/${NEW_VERSION}/* ${WORKSPACE}/
+          echo $NEW_VERSION > ${WORKSPACE}/current_version
         else
-          echo "Error: Directory $NEW_VERSION is empty or does not exist!" >&2
-          ls -l $NEW_VERSION || true
+          echo "Error: Directory ${NEW_VERSION} is empty or does not exist!" >&2
+          ls -l ${WORKSPACE}/${NEW_VERSION} || true
           exit 1
         fi
 
