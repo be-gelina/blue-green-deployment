@@ -74,6 +74,14 @@ jobs:
         echo $NEW_VERSION > ${WORKSPACE}/current_version
         cat ${WORKSPACE}/current_version
 
+    - name: Save current version
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add current_version
+        git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
+        git push origin main
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
