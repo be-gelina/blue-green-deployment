@@ -1,7 +1,7 @@
 name: Blue-Green Deployment
 
 on:
-  workflow_dispatch: # Позволяет вручную запускать workflow
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -14,38 +14,41 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Initialize current version
+      run: |
+        if [ ! -f current_version ]; then
+          echo "blue" > current_version
+        fi
+
+    - name: Debug file paths
+      run: |
+        ls -l
+        ls -l blue/
+        ls -l green/
+
     - name: Set deployment target
       id: set-target
       run: |
-        if [ -f current_version ]; then
-          CURRENT=$(cat current_version)
-        else
-          CURRENT="green"
-        fi
-
+        CURRENT=$(cat current_version)
         if [ "$CURRENT" = "blue" ]; then
           echo "NEW_VERSION=green" >> $GITHUB_ENV
         else
           echo "NEW_VERSION=blue" >> $GITHUB_ENV
         fi
-
         echo "Current version: $CURRENT"
         echo "New version: ${{ env.NEW_VERSION }}"
-    
+
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
-        # Удаляем старые файлы из корня
         rm -rf ./*
-        # Копируем новую версию в корень
-        cp -r $NEW_VERSION/* ./  # Копируем содержимое новой версии в корень
-        # Обновляем метку текущей версии
+        cp -r $NEW_VERSION/* ./
         echo $NEW_VERSION > current_version
-
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./
+
 
