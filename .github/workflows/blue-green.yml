@@ -53,20 +53,20 @@ jobs:
 
         cd ${WORKSPACE}
 
-        # Проверяем, что папка существует
-        if [ -d "${NEW_VERSION}" ]; then
-          echo "Directory ${NEW_VERSION} exists."
-          ls -l ${NEW_VERSION}
+        # Проверяем, что файл index.html в папке существует
+        if [ -f "${WORKSPACE}/${NEW_VERSION}/index.html" ]; then
+          echo "File index.html exists in ${NEW_VERSION}."
+          ls -l ${WORKSPACE}/${NEW_VERSION}/index.html
         else
-          echo "Directory ${NEW_VERSION} does not exist or is inaccessible."
+          echo "File index.html does not exist in ${NEW_VERSION}!"
           exit 1
         fi
 
-        # Удаляем старые файлы из корня
-        rm -rf ./*
+        # Удаляем старый index.html из корня
+        rm -f ${WORKSPACE}/index.html
 
-        # Копируем содержимое новой версии
-        rsync -av ${WORKSPACE}/${NEW_VERSION}/ ${WORKSPACE}/ || cp -r ${WORKSPACE}/${NEW_VERSION}/* ${WORKSPACE}/
+        # Копируем index.html из новой версии в корень
+        cp ${WORKSPACE}/${NEW_VERSION}/index.html ${WORKSPACE}/index.html
 
         # Обновляем файл текущей версии
         echo $NEW_VERSION > current_version
