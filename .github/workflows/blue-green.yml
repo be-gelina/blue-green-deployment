@@ -40,6 +40,11 @@ jobs:
         echo "Current version: $CURRENT"
         echo "New version: ${{ env.NEW_VERSION }}"
 
+    - name: Debug deployment target
+      run: |
+        echo "Current version from file: $(cat current_version)"
+        echo "New version: ${{ env.NEW_VERSION }}"
+
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
