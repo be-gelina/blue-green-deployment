@@ -78,7 +78,18 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git pull origin main --rebase  # Подтягиваем изменения из удалённой ветки
+        
+        # Проверяем и коммитим локальные изменения, если они есть
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Committing local changes before pulling..."
+          git add current_version
+          git commit -m "Pre-pull commit for current_version"
+        fi
+
+        # Подтягиваем изменения из удалённой ветки
+        git pull origin main --rebase
+
+        # Добавляем изменения current_version
         git add current_version
         git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
         git push origin main
