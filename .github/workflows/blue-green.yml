@@ -41,9 +41,14 @@ jobs:
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
-        rm -rf ./*
-        cp -r $NEW_VERSION/* ./
-        echo $NEW_VERSION > current_version
+        if [ -d "$NEW_VERSION" ] && [ "$(ls -A $NEW_VERSION)" ]; then
+          rm -rf ./*
+          cp -r $NEW_VERSION/* ./
+          echo $NEW_VERSION > current_version
+        else
+          echo "Error: Directory $NEW_VERSION is empty or does not exist!" >&2
+          exit 1
+        fi
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
