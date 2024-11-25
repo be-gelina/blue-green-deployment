@@ -87,12 +87,15 @@ jobs:
         fi
 
         # Подтягиваем изменения из удалённой ветки
-        git pull origin main --rebase
+        git pull origin main --rebase || exit 0  # Не завершаем ошибкой, если нет новых изменений
 
-        # Добавляем изменения current_version
-        git add .
-        git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
-        git push origin main
+        # Проверяем, нужно ли пушить изменения
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Pushing changes to origin/main..."
+          git push origin main
+        else
+          echo "No changes to push. Exiting..."
+        fi
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
