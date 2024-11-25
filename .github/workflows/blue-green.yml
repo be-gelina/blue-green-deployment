@@ -50,8 +50,13 @@ jobs:
         NEW_VERSION=${{ env.NEW_VERSION }}
         WORKSPACE=${{ github.workspace }}
 
-        # Переходим в рабочую директорию
+        # Убедимся, что мы находимся в рабочей директории
         cd ${WORKSPACE}
+
+        # Отладка: проверим, где мы находимся
+        echo "Current working directory: $(pwd)"
+        echo "Contents of current directory:"
+        ls -l
 
         # Удаляем старые файлы из корня
         rm -rf ./*
