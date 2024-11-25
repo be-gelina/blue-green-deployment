@@ -78,6 +78,7 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git pull origin main --rebase  # Подтягиваем изменения из удалённой ветки
         git add current_version
         git commit -m "Update current_version to ${{ env.NEW_VERSION }}"
         git push origin main
