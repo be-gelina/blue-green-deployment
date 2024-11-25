@@ -1,0 +1,30 @@
+name: Blue-Green Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Blue-Green
+        run: |
+          ssh -o StrictHostKeyChecking=no vagrant@<IP-адрес виртуальной машины> << EOF
+          CURRENT_PATH="/var/www/html/current"
+          BLUE_PATH="/var/www/html/blue"
+          GREEN_PATH="/var/www/html/green"
+
+          if [ "$(readlink $CURRENT_PATH)" == "$BLUE_PATH" ]; then
+              rsync -a $GITHUB_WORKSPACE/green/ $GREEN_PATH/
+              ln -sfn $GREEN_PATH $CURRENT_PATH
+          else
+              rsync -a $GITHUB_WORKSPACE/blue/ $BLUE_PATH/
+              ln -sfn $BLUE_PATH $CURRENT_PATH
+          fi
+          EOF
