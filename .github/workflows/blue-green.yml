@@ -37,21 +37,34 @@ jobs:
     - name: Set deployment target
       id: set-target
       run: |
-        CURRENT=$(cat current_version)
+        echo "Reading current version..."
+        if [ -f current_version ]; then
+          CURRENT=$(cat current_version)
+        else
+          echo "current_version file not found! Defaulting to 'blue'."
+          CURRENT="blue"
+        fi
+        echo "Current version: $CURRENT"
+
+        # Определяем новую версию
         if [ "$CURRENT" = "blue" ]; then
           NEW_VERSION="green"
         else
           NEW_VERSION="blue"
         fi
-        echo "Current version: $CURRENT"
+
         echo "New version: $NEW_VERSION"
+
+        # Сохраняем переменные в GITHUB_ENV
         echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "CURRENT=$CURRENT" >> $GITHUB_ENV
 
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
         WORKSPACE=${{ github.workspace }}
 
+        echo "Deploying new version: $NEW_VERSION"
         cd ${WORKSPACE}
 
         # Проверяем, что файл index.html в папке существует
@@ -64,13 +77,15 @@ jobs:
         fi
 
         # Удаляем старый index.html из корня
+        echo "Removing old index.html from root..."
         rm -f ${WORKSPACE}/index.html
 
         # Копируем index.html из новой версии в корень
+        echo "Copying new index.html to root..."
         cp ${WORKSPACE}/${NEW_VERSION}/index.html ${WORKSPACE}/index.html
 
         # Обновляем файл current_version
-        echo "Switching to $NEW_VERSION..."
+        echo "Updating current_version to $NEW_VERSION..."
         echo $NEW_VERSION > ${WORKSPACE}/current_version
         cat ${WORKSPACE}/current_version
 
