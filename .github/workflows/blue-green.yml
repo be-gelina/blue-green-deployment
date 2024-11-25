@@ -35,10 +35,13 @@ jobs:
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
-
-        cp -r $NEW_VERSION/* ./
-
+        # Удаляем старые файлы из корня
+        rm -rf ./*
+        # Копируем новую версию в корень
+        cp -r $NEW_VERSION/* ./  # Копируем содержимое новой версии в корень
+        # Обновляем метку текущей версии
         echo $NEW_VERSION > current_version
+
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
