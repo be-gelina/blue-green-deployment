@@ -1,10 +1,10 @@
 name: Blue-Green Deployment
 
 on:
-  workflow_dispatch:  # Позволяет вручную запускать workflow
+  workflow_dispatch:
   push:
     branches:
-      - main  # Запускается при пуше в ветку main
+      - main
 
 jobs:
   deploy:
@@ -16,21 +16,25 @@ jobs:
 
     - name: Initialize current version
       run: |
-        # Проверяем, существует ли файл current_version, если нет, создаём его
         if [ ! -f current_version ]; then
           echo "blue" > current_version
         fi
 
     - name: Debug file paths
       run: |
-        ls -l  # Смотрим, что в корне репозитория
-        ls -l blue/  # Проверяем содержимое папки blue
-        ls -l green/  # Проверяем содержимое папки green
+        ls -l
+        ls -l blue/
+        ls -l green/
+
+    - name: Debug green folder
+      run: |
+        WORKSPACE=${{ github.workspace }}
+        echo "Contents of green folder:"
+        ls -l ${WORKSPACE}/green || echo "Green folder is not accessible"
 
     - name: Set deployment target
       id: set-target
       run: |
-        # Определяем текущую версию
         CURRENT=$(cat current_version)
         if [ "$CURRENT" = "blue" ]; then
           echo "NEW_VERSION=green" >> $GITHUB_ENV
@@ -40,39 +44,27 @@ jobs:
         echo "Current version: $CURRENT"
         echo "New version: ${{ env.NEW_VERSION }}"
 
-    - name: Debug deployment target
-      run: |
-        echo "Current version from file: $(cat current_version)"
-        echo "New version: ${{ env.NEW_VERSION }}"
-
     - name: Deploy new version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
         WORKSPACE=${{ github.workspace }}
 
-        # Убедимся, что мы находимся в рабочей директории
         cd ${WORKSPACE}
 
-        # Отладка: проверим, где мы находимся
-        echo "Current working directory: $(pwd)"
-        echo "Contents of current directory:"
-        ls -l
-
-        # Удаляем старые файлы из корня
-        rm -rf ./*
-
-        # Проверяем содержимое папки и копируем файлы
-        if [ -d "${NEW_VERSION}" ] && [ "$(ls -A ${NEW_VERSION})" ]; then
-          cp -r ${NEW_VERSION}/* ./
-          echo $NEW_VERSION > current_version
+        if [ -d "${NEW_VERSION}" ]; then
+          echo "Directory ${NEW_VERSION} exists."
+          ls -l ${NEW_VERSION}
         else
-          echo "Error: Directory ${NEW_VERSION} is empty or does not exist!" >&2
-          ls -l ${NEW_VERSION} || true
+          echo "Directory ${NEW_VERSION} does not exist or is inaccessible."
           exit 1
         fi
+
+        rm -rf ./*
+        cp -r ${NEW_VERSION}/* ./
+        echo $NEW_VERSION > current_version
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./  # Публикуем содержимое корня
+        publish_dir: ./
